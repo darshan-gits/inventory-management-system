@@ -3,52 +3,182 @@ let currentPage = 1;
 const rowsPerPage = 5; // change this to show more/less per page
 let stockChart = null;
 
+function toggleNotifDropdown() {
+  const dropdown = document.getElementById('notif-dropdown');
+  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+document.addEventListener('click', (e) => {
+  const wrapper = document.querySelector('.notif-wrapper');
+  if (wrapper && !wrapper.contains(e.target)) {
+    document.getElementById('notif-dropdown').style.display = 'none';
+  }
+});
+
+function showLowStockBanner(products) {
+  const lowStockItems = products.filter(p => p.quantity <= p.reorder_level);
+  const banner = document.getElementById('low-stock-banner');
+  const dot = document.getElementById('notif-dot');
+  const list = document.getElementById('notif-list');
+
+  if (lowStockItems.length === 0) {
+    banner.style.display = 'none';
+    if (dot) dot.style.display = 'none';
+    if (list) list.innerHTML = '<div class="notif-empty">No low stock items</div>';
+    return;
+  }
+
+  const names = lowStockItems.map(p => p.name).join(', ');
+
+  banner.innerHTML = `
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span><strong>Low stock alert:</strong> ${lowStockItems.length} product(s) need reordering — ${names}</span>
+    <button onclick="document.getElementById('low-stock-banner').style.display='none'">
+      <i class="bi bi-x"></i>
+    </button>
+  `;
+  banner.style.display = 'flex';
+
+  if (dot) dot.style.display = 'block';
+  if (list) {
+    list.innerHTML = lowStockItems.map(p => `
+      <div class="notif-item">
+        <strong>${p.name}</strong>
+        <span>${p.quantity} left (reorder at ${p.reorder_level})</span>
+      </div>
+    `).join('');
+  }
+}
+
+function animateCounter(elementId, endValue, prefix = '') {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+
+  const duration = 800; // ms
+  const startTime = performance.now();
+
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const current = Math.floor(progress * endValue);
+    el.textContent = prefix + current.toLocaleString('en-IN');
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = prefix + endValue.toLocaleString('en-IN');
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
 // Load products from server
 function loadProducts() {
+  console.log("Loading products...");
+
   fetch('/api/products')
     .then(response => response.json())
     .then(products => {
+      console.log(products);
+
       allProducts = products;
       currentPage = 1;
       renderProducts(allProducts);
       updateDashboard(allProducts);
       renderChart(allProducts);
+      showLowStockBanner(allProducts);
     })
     .catch(err => console.error(err));
 }
-
 // Render product rows (paginated)
 function renderProducts(products) {
-  const tbody = document.getElementById('product-body');
-  tbody.innerHTML = '';
 
-  const start = (currentPage - 1) * rowsPerPage;
-  const paginatedProducts = products.slice(start, start + rowsPerPage);
+    const tbody = document.getElementById('product-body');
 
-  paginatedProducts.forEach(product => {
-    const lowStock = product.quantity <= product.reorder_level;
-    tbody.innerHTML += `
+    tbody.innerHTML = '';
+
+    const start = (currentPage - 1) * rowsPerPage;
+
+    const paginatedProducts = products.slice(start, start + rowsPerPage);
+
+    paginatedProducts.forEach(product => {
+
+        const lowStock = product.quantity <= product.reorder_level;
+
+        tbody.innerHTML += `
+
 <tr class="${lowStock ? 'table-danger' : ''}">
-    <td>${product.id}</td>
-    <td>${product.name}</td>
-    <td>${product.quantity}</td>
-    <td>₹${product.price}</td>
-    <td>${product.reorder_level}</td>
-    <td>
-    <button class="btn btn-sm btn-outline-primary" onclick="editProduct(${product.id}, '${product.name}', ${product.quantity}, ${product.price}, ${product.reorder_level})">
-        Edit
-    </button>
-    <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${product.id})">
-        Delete
-    </button>
+
+<td>${product.id}</td>
+
+<td>
+    <img
+src="${product.image
+    ? '/uploads/' + product.image
+    : '/images/no-image.png'}"
+class="product-image"
+onclick="previewImage(this.src)"
+onerror="this.onerror=null;this.src='/images/no-image.png';">
 </td>
+
+<td>${product.name}</td>
+
+<td>
+  ${product.category_name
+    ? `<span class="category-badge">${product.category_name}</span>`
+    : `<span class="text-secondary">—</span>`}
+</td>
+
+<td>${product.quantity}</td>
+<td>₹${product.price}</td>
+
+<td>${product.reorder_level}</td>
+
+<td>
+
+${currentUserRole === 'admin' ? `
+
+<button class="btn btn-sm btn-success me-1" title="Stock In"
+onclick="stockIn(${product.id}, '${product.name}')">
+<i class="bi bi-box-arrow-in-down"></i>
+</button>
+
+<button class="btn btn-sm btn-info me-1" title="Stock Out"
+onclick="stockOut(${product.id}, '${product.name}')">
+<i class="bi bi-box-arrow-up"></i>
+</button>
+
+<button class="btn btn-sm btn-warning me-1" title="Edit"
+onclick="editProduct(
+${product.id},
+'${product.name}',
+${product.quantity},
+${product.price},
+${product.reorder_level}
+)">
+<i class="bi bi-pencil"></i>
+</button>
+
+<button
+class="btn btn-sm btn-outline-danger" title="Delete"
+onclick="deleteProduct(${product.id})">
+<i class="bi bi-trash"></i>
+</button>
+
+` : ''}
+
+</td>
+
 </tr>
+
 `;
-  });
 
-  renderPagination(products);
+    });
+
+    renderPagination(products);
+
 }
-
 // Render pagination buttons
 function renderPagination(products) {
   const pageCount = Math.ceil(products.length / rowsPerPage);
@@ -91,9 +221,9 @@ function updateDashboard(products) {
   const lowStockCount = products.filter(p => p.quantity <= p.reorder_level).length;
   const inventoryValue = products.reduce((sum, p) => sum + (p.quantity * p.price), 0);
 
-  document.getElementById('total-products').textContent = totalProducts;
-  document.getElementById('low-stock').textContent = lowStockCount;
-  document.getElementById('inventory-value').textContent = `₹${inventoryValue.toLocaleString('en-IN')}`;
+  animateCounter('total-products', totalProducts);
+  animateCounter('low-stock', lowStockCount);
+  animateCounter('inventory-value', inventoryValue, '₹');
 }
 
 // Render stock chart
@@ -136,36 +266,63 @@ function renderChart(products) {
     }
   });
 }
+let currentUserRole = null; // will be 'admin' or 'staff'
 
+async function checkLoginStatus() {
+  const res = await fetch('/api/auth/status');
+  const data = await res.json();
+  currentUserRole = data.role;
+
+  const userInfo = document.getElementById('user-info');
+  if (userInfo) {
+    userInfo.textContent = `Logged in as: ${data.role === 'admin' ? 'Admin' : 'Staff'}`;
+  }
+
+  const avatar = document.getElementById('user-avatar');
+  if (avatar) {
+    avatar.textContent = data.role === 'admin' ? 'A' : 'S';
+  }
+}
 // Initial load
-loadProducts();
-
+checkLoginStatus().then(() => {
+  loadProducts();
+  loadCategories();
+  loadSupplierCount();
+});
 // Add new product
 document.getElementById('productForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
 
-  const product = {
-    name: document.getElementById('name').value,
-    quantity: Number(document.getElementById('quantity').value),
-    price: Number(document.getElementById('price').value),
-    reorder_level: Number(document.getElementById('reorder').value)
-  };
+    e.preventDefault();
 
-  const response = await fetch('/api/products', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(product)
-  });
+    const formData = new FormData();
 
-  const result = await response.json();
+    formData.append('name', document.getElementById('name').value);
+    formData.append('quantity', document.getElementById('quantity').value);
+    formData.append('price', document.getElementById('price').value);
+    formData.append('reorder_level', document.getElementById('reorder').value);
+    formData.append('category_id', document.getElementById('category').value);
 
-  alert(result.message);
+    const image = document.getElementById('image').files[0];
 
-  document.getElementById('productForm').reset();
+    if (image) {
+        formData.append('image', image);
+    }
 
-  loadProducts();
+    const response = await fetch('/api/products', {
+        method: 'POST',
+        body: formData
+    });
+
+    const result = await response.json();
+
+    alert(result.message);
+
+    document.getElementById('productForm').reset();
+
+    document.getElementById('preview').style.display = 'none';
+
+    loadProducts();
+
 });
 
 // Delete product
@@ -177,41 +334,78 @@ async function deleteProduct(id) {
     method: 'DELETE'
   });
 
+  if (response.status === 403) {
+    alert("Only Admin users can delete products.");
+    return;
+  }
+
   const result = await response.json();
 
   alert(result.message);
 
   loadProducts();
 }
-
 // Edit product - opens modal
-function editProduct(id, currentName, currentQuantity, currentPrice, currentReorder) {
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-name').value = currentName;
-  document.getElementById('edit-quantity').value = currentQuantity;
-  document.getElementById('edit-price').value = currentPrice;
-  document.getElementById('edit-reorder').value = currentReorder;
+function editProduct(
+    id,
+    currentName,
+    currentQuantity,
+    currentPrice,
+    currentReorder,
+    currentCategory = '',
+    currentImage = ''
+) {
 
-  document.getElementById('editModal').style.display = 'block';
+    document.getElementById('edit-id').value = id;
+    document.getElementById('edit-name').value = currentName;
+    document.getElementById('edit-quantity').value = currentQuantity;
+    document.getElementById('edit-price').value = currentPrice;
+    document.getElementById('edit-reorder').value = currentReorder;
+
+    if(document.getElementById('edit-category')){
+        document.getElementById('edit-category').value = currentCategory;
+    }
+
+    // Show current image
+    if(document.getElementById('edit-preview')){
+
+        if(currentImage){
+            document.getElementById('edit-preview').src =
+                '/uploads/' + currentImage;
+        }else{
+            document.getElementById('edit-preview').src =
+                '/images/no-image.png';
+        }
+
+        document.getElementById('edit-preview').style.display = 'block';
+    }
+
+    document.getElementById('editModal').style.display = 'block';
 }
 
-function closeEditModal() {
-  document.getElementById('editModal').style.display = 'none';
+function closeEditModal(){
+    document.getElementById('editModal').style.display='none';
 }
-
 async function submitEdit() {
+
   const id = document.getElementById('edit-id').value;
-  const name = document.getElementById('edit-name').value;
-  const quantity = Number(document.getElementById('edit-quantity').value);
-  const price = Number(document.getElementById('edit-price').value);
-  const reorder_level = Number(document.getElementById('edit-reorder').value);
+
+  const formData = new FormData();
+
+  formData.append('name', document.getElementById('edit-name').value);
+  formData.append('quantity', document.getElementById('edit-quantity').value);
+  formData.append('price', document.getElementById('edit-price').value);
+  formData.append('reorder_level', document.getElementById('edit-reorder').value);
+
+  const image = document.getElementById('edit-image').files[0];
+
+  if (image) {
+    formData.append('image', image);
+  }
 
   const response = await fetch(`/api/products/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name, quantity, price, reorder_level })
+    method: 'PUT',
+    body: formData
   });
 
   const result = await response.json();
@@ -219,9 +413,84 @@ async function submitEdit() {
   alert(result.message);
 
   closeEditModal();
+
   loadProducts();
 }
+
 async function logout() {
   await fetch('/api/auth/logout', { method: 'POST' });
   window.location.href = '/login.html';
+}
+async function stockIn(id, name) {
+  const quantity = prompt(`Enter quantity to add for ${name}:`);
+
+  if (!quantity || quantity <= 0) return;
+
+  const response = await fetch(`/api/products/${id}/stockin`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      quantity: Number(quantity)
+    })
+  });
+
+  const result = await response.json();
+
+  alert(result.message);
+
+  loadProducts();
+}async function stockOut(id, name) {
+
+    const quantity = prompt(`Enter quantity to remove from ${name}`);
+
+    if (!quantity || quantity <= 0) {
+        alert("Please enter a valid quantity.");
+        return;
+    }
+
+    const response = await fetch(`/api/products/${id}/stockout`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            quantity: Number(quantity)
+        })
+    });
+
+    const result = await response.json();
+
+    alert(result.message);
+
+    if (response.ok) {
+        loadProducts();
+    }
+}
+
+async function loadCategories() {
+  const response = await fetch('/api/categories');
+  const categories = await response.json();
+
+  const select = document.getElementById('category');
+  select.innerHTML = '<option value="">Select Category</option>';
+
+  categories.forEach(cat => {
+    select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+  });
+}
+async function loadSupplierCount() {
+  const res = await fetch('/api/suppliers');
+  const suppliers = await res.json();
+  animateCounter('total-suppliers', suppliers.length);
+}
+function previewImage(src) {
+    document.getElementById('previewImage').src = src;
+
+    const modal = new bootstrap.Modal(
+        document.getElementById('imageModal')
+    );
+
+    modal.show();
 }

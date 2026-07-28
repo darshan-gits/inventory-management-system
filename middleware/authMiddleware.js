@@ -3,7 +3,6 @@ function requireLogin(req, res, next) {
     return next();
   }
 
-  // If it's an API request, send JSON 401 instead of redirecting
   if (req.originalUrl.startsWith('/api/')) {
     return res.status(401).json({ message: 'Not authenticated' });
   }
@@ -11,4 +10,12 @@ function requireLogin(req, res, next) {
   res.redirect('/login.html');
 }
 
-module.exports = requireLogin;
+function requireAdmin(req, res, next) {
+  if (req.session && req.session.loggedIn && req.session.role === 'admin') {
+    return next();
+  }
+
+  res.status(403).json({ message: 'Admins only' });
+}
+
+module.exports = { requireLogin, requireAdmin };
