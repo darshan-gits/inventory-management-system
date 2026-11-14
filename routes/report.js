@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
+
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const pool = require('../config/db');
+const { requireAdmin } = require('../middleware/authMiddleware');
 
+// ====================================
 // Export Products to Excel
-router.get('/products', async (req, res) => {
+// ADMIN ONLY
+// ====================================
+router.get('/products', requireAdmin, async (req, res) => {
 
     try {
 
@@ -69,10 +74,13 @@ router.get('/products', async (req, res) => {
     }
 
 });
+
+
 // ====================================
 // Export Products to PDF
+// ADMIN ONLY
 // ====================================
-router.get('/products/pdf', async (req, res) => {
+router.get('/products/pdf', requireAdmin, async (req, res) => {
 
     try {
 
@@ -117,29 +125,12 @@ router.get('/products/pdf', async (req, res) => {
 
         products.forEach(product => {
 
-            doc.text(
-                `ID: ${product.id}`
-            );
-
-            doc.text(
-                `Product: ${product.name}`
-            );
-
-            doc.text(
-                `Quantity: ${product.quantity}`
-            );
-
-            doc.text(
-                `Price: ₹${product.unit_price}`
-            );
-
-            doc.text(
-                `Reorder Level: ${product.reorder_level}`
-            );
-
-            doc.text(
-                `Category: ${product.category || '-'}`
-            );
+            doc.text(`ID: ${product.id}`);
+            doc.text(`Product: ${product.name}`);
+            doc.text(`Quantity: ${product.quantity}`);
+            doc.text(`Price: ₹${product.unit_price}`);
+            doc.text(`Reorder Level: ${product.reorder_level}`);
+            doc.text(`Category: ${product.category || '-'}`);
 
             doc.moveDown();
 
@@ -158,4 +149,5 @@ router.get('/products/pdf', async (req, res) => {
     }
 
 });
+
 module.exports = router;

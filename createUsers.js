@@ -8,7 +8,7 @@ const pool = require('./config/db');
 
 async function createUsers() {
   const users = [
-    { username: 'admin', password: 'admin123', role: 'admin' },
+    { username: 'darshan', password: 'darshan@123', role: 'admin' },
     { username: 'staff1', password: 'staff123', role: 'staff' }
   ];
 

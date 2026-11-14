@@ -4,14 +4,13 @@ const pool = require('../config/db');
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const logAction = require('../utils/auditLogger');
+const { requireAdmin } = require('../middleware/authMiddleware');
 
 // =========================
 // GET ALL SUPPLIERS
 // =========================
 router.get('/', async (req, res) => {
-
     try {
-
         const [rows] = await pool.query(
             'SELECT * FROM suppliers ORDER BY id DESC'
         );
@@ -19,24 +18,19 @@ router.get('/', async (req, res) => {
         res.json(rows);
 
     } catch (err) {
-
         console.error(err);
 
         res.status(500).json({
             message: 'Database Error'
         });
-
     }
-
 });
 
 // =========================
 // EXPORT SUPPLIERS TO EXCEL
 // =========================
 router.get('/export', async (req, res) => {
-
     try {
-
         const [rows] = await pool.query(`
             SELECT
                 supplier_name,
@@ -49,7 +43,6 @@ router.get('/export', async (req, res) => {
         `);
 
         const workbook = new ExcelJS.Workbook();
-
         const worksheet = workbook.addWorksheet('Suppliers');
 
         worksheet.columns = [
@@ -75,28 +68,22 @@ router.get('/export', async (req, res) => {
         );
 
         await workbook.xlsx.write(res);
-
         res.end();
 
     } catch (err) {
-
         console.error(err);
 
         res.status(500).json({
             message: 'Export Failed'
         });
-
     }
-
 });
 
 // =========================
 // EXPORT SUPPLIERS TO PDF
 // =========================
 router.get('/pdf', async (req, res) => {
-
     try {
-
         const [rows] = await pool.query(`
             SELECT
                 supplier_name,
@@ -130,7 +117,6 @@ router.get('/pdf', async (req, res) => {
         doc.moveDown();
 
         rows.forEach(row => {
-
             doc.fontSize(11);
 
             doc.text(`Supplier : ${row.supplier_name}`);
@@ -140,30 +126,25 @@ router.get('/pdf', async (req, res) => {
             doc.text(`Address : ${row.address}`);
 
             doc.moveDown();
-
         });
 
         doc.end();
 
     } catch (err) {
-
         console.error(err);
 
         res.status(500).json({
             message: 'PDF Export Failed'
         });
-
     }
-
 });
 
 // =========================
 // ADD SUPPLIER
+// ADMIN ONLY
 // =========================
-router.post('/', async (req, res) => {
-
+router.post('/', requireAdmin, async (req, res) => {
     try {
-
         const {
             supplier_name,
             contact_person,
@@ -198,24 +179,20 @@ router.post('/', async (req, res) => {
         });
 
     } catch (err) {
-
         console.error(err);
 
         res.status(500).json({
             message: 'Database Error'
         });
-
     }
-
 });
 
 // =========================
 // UPDATE SUPPLIER
+// ADMIN ONLY
 // =========================
-router.put('/:id', async (req, res) => {
-
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
-
         const { id } = req.params;
 
         const {
@@ -225,6 +202,17 @@ router.put('/:id', async (req, res) => {
             email,
             address
         } = req.body;
+
+        const [existing] = await pool.query(
+            'SELECT supplier_name FROM suppliers WHERE id=?',
+            [id]
+        );
+
+        if (existing.length === 0) {
+            return res.status(404).json({
+                message: 'Supplier not found'
+            });
+        }
 
         await pool.query(
             `UPDATE suppliers
@@ -257,30 +245,32 @@ router.put('/:id', async (req, res) => {
         });
 
     } catch (err) {
-
         console.error(err);
 
         res.status(500).json({
             message: 'Database Error'
         });
-
     }
-
 });
 
 // =========================
 // DELETE SUPPLIER
+// ADMIN ONLY
 // =========================
-router.delete('/:id', async (req, res) => {
-
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
-
         const { id } = req.params;
 
         const [supplier] = await pool.query(
             'SELECT supplier_name FROM suppliers WHERE id=?',
             [id]
         );
+
+        if (supplier.length === 0) {
+            return res.status(404).json({
+                message: 'Supplier not found'
+            });
+        }
 
         await pool.query(
             'DELETE FROM suppliers WHERE id=?',
@@ -292,7 +282,7 @@ router.delete('/:id', async (req, res) => {
             'DELETE',
             'suppliers',
             id,
-            `Deleted supplier: ${supplier.length ? supplier[0].supplier_name : id}`
+            `Deleted supplier: ${supplier[0].supplier_name}`
         );
 
         res.json({
@@ -300,15 +290,12 @@ router.delete('/:id', async (req, res) => {
         });
 
     } catch (err) {
-
         console.error(err);
 
         res.status(500).json({
             message: 'Database Error'
         });
-
     }
-
 });
 
 module.exports = router;

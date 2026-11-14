@@ -25,12 +25,12 @@ router.post('/login', async (req, res) => {
     }
 
     // Store user info in the session
-    req.session.loggedIn = true;
-    req.session.username = user.username;
-    req.session.role = user.role; // 'admin' or 'staff'
+req.session.loggedIn = true;
+req.session.userId = user.id;
+req.session.username = user.username;
+req.session.role = user.role;
 
     res.json({ message: 'Login successful', role: user.role });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error during login' });

@@ -1,134 +1,642 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Supplier Management</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-<link rel="stylesheet" href="/css/style.css">
+    <title>ABC STORE - Suppliers</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    >
+
+    <!-- Main Project CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        /* =========================================
+           ABC STORE - SUPPLIER PAGE
+        ========================================= */
+
+        body {
+            background: #f5f7fb !important;
+            color: #172033;
+        }
+
+        .supplier-page {
+            min-height: 100vh;
+        }
+
+        /* Top Header */
+        .supplier-header {
+            background: #0f172a;
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.12);
+        }
+
+        .supplier-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .supplier-brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .supplier-brand h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .supplier-brand span {
+            display: block;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .dashboard-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #475569;
+            color: white;
+            background: transparent;
+            padding: 9px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .dashboard-btn:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        /* Main Content */
+        .supplier-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 28px 50px;
+        }
+
+        /* Page Heading */
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 750;
+            color: #172033;
+        }
+
+        .page-title p {
+            margin: 6px 0 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* Cards */
+        .supplier-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 5px 18px rgba(15, 23, 42, 0.06);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .supplier-card-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid #eef0f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .supplier-card-title {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .supplier-card-title .icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .supplier-card-title h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #172033;
+        }
+
+        .supplier-card-title p {
+            margin: 3px 0 0;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .supplier-card-body {
+            padding: 22px;
+        }
+
+        /* Form */
+        .form-label-custom {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .supplier-input {
+            width: 100%;
+            height: 46px;
+            border: 1px solid #dfe4ea;
+            border-radius: 9px;
+            padding: 0 13px;
+            font-size: 14px;
+            color: #172033;
+            background: #fff;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .supplier-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        .supplier-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .add-supplier-btn {
+            height: 46px;
+            padding: 0 20px;
+            border: none;
+            border-radius: 9px;
+            background: #2563eb;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .add-supplier-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(37, 99, 235, 0.20);
+        }
+
+        /* Search */
+        .supplier-search {
+            position: relative;
+            width: 320px;
+        }
+
+        .supplier-search i {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .supplier-search input {
+            width: 100%;
+            height: 42px;
+            border: 1px solid #dfe4ea;
+            border-radius: 9px;
+            padding: 0 13px 0 38px;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .supplier-search input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+        }
+
+        /* Table */
+        .supplier-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .supplier-table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .supplier-table thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 15px 14px;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        .supplier-table tbody td {
+            padding: 15px 14px;
+            border-bottom: 1px solid #f0f2f5;
+            color: #475569;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .supplier-table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .supplier-table tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .supplier-table tbody td:first-child {
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* Supplier name */
+        .supplier-table tbody td:nth-child(2) {
+            color: #172033;
+            font-weight: 700;
+        }
+
+        /* Action buttons */
+        .supplier-table .btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 4px;
+            transition: all 0.18s ease;
+        }
+
+        .supplier-table .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Empty table */
+        .empty-supplier {
+            text-align: center;
+            padding: 45px 20px !important;
+            color: #94a3b8 !important;
+        }
+
+        .empty-supplier i {
+            display: block;
+            font-size: 38px;
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+
+            .supplier-header {
+                padding: 0 16px;
+            }
+
+            .supplier-brand h1 {
+                font-size: 17px;
+            }
+
+            .supplier-brand span {
+                display: none;
+            }
+
+            .dashboard-btn {
+                padding: 8px 11px;
+            }
+
+            .dashboard-btn span {
+                display: none;
+            }
+
+            .supplier-content {
+                padding: 22px 15px 40px;
+            }
+
+            .page-title h2 {
+                font-size: 23px;
+            }
+
+            .supplier-card-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .supplier-search {
+                width: 100%;
+            }
+
+            .supplier-card-body {
+                padding: 18px;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light">
 
-<nav class="navbar navbar-dark bg-dark mb-4">
-<div class="container d-flex justify-content-between align-items-center">
-<span class="navbar-brand d-flex align-items-center gap-2">
-<i class="bi bi-truck"></i> Supplier Management
-</span>
+<body>
 
-<a href="/" class="btn btn-outline-light btn-sm">
-<i class="bi bi-speedometer2"></i> Dashboard
-</a>
+<div class="supplier-page">
+
+    <!-- HEADER -->
+    <header class="supplier-header">
+
+        <div class="supplier-brand">
+
+            <div class="supplier-brand-icon">
+                <i class="bi bi-truck"></i>
+            </div>
+
+            <div>
+                <h1>ABC STORE</h1>
+                <span>Inventory Management System</span>
+            </div>
+
+        </div>
+
+        <a href="/" class="dashboard-btn">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Dashboard</span>
+        </a>
+
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="supplier-content">
+
+        <!-- PAGE TITLE -->
+        <div class="page-title">
+
+            <h2>Supplier Management</h2>
+
+            <p>
+                Add, search and manage your store suppliers.
+            </p>
+
+        </div>
+
+
+        <!-- ADD SUPPLIER CARD -->
+        <section class="supplier-card">
+
+            <div class="supplier-card-header">
+
+                <div class="supplier-card-title">
+
+                    <div class="icon">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+
+                    <div>
+                        <h3>Add New Supplier</h3>
+                        <p>Enter supplier information below</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="supplier-card-body">
+
+                <form id="supplierForm">
+
+                    <div class="row g-3">
+
+                        <!-- Supplier Name -->
+                        <div class="col-md-4">
+
+                            <label class="form-label-custom">
+                                Supplier Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="supplier_name"
+                                class="supplier-input"
+                                placeholder="Enter supplier name"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- Contact Person -->
+                        <div class="col-md-4">
+
+                            <label class="form-label-custom">
+                                Contact Person
+                            </label>
+
+                            <input
+                                type="text"
+                                id="contact_person"
+                                class="supplier-input"
+                                placeholder="Enter contact person"
+                            >
+
+                        </div>
+
+
+                        <!-- Phone -->
+                        <div class="col-md-4">
+
+                            <label class="form-label-custom">
+                                Phone Number
+                            </label>
+
+                            <input
+                                type="text"
+                                id="phone"
+                                class="supplier-input"
+                                placeholder="Enter phone number"
+                            >
+
+                        </div>
+
+
+                        <!-- Email -->
+                        <div class="col-md-4">
+
+                            <label class="form-label-custom">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                class="supplier-input"
+                                placeholder="Enter email address"
+                            >
+
+                        </div>
+
+
+                        <!-- Address -->
+                        <div class="col-md-8">
+
+                            <label class="form-label-custom">
+                                Address
+                            </label>
+
+                            <input
+                                type="text"
+                                id="address"
+                                class="supplier-input"
+                                placeholder="Enter supplier address"
+                            >
+
+                        </div>
+
+
+                        <!-- Button -->
+                        <div class="col-12">
+
+                            <button
+                                type="submit"
+                                class="add-supplier-btn"
+                            >
+                                <i class="bi bi-plus-lg"></i>
+                                Add Supplier
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- SUPPLIER LIST -->
+        <section class="supplier-card">
+
+            <div class="supplier-card-header">
+
+                <div class="supplier-card-title">
+
+                    <div class="icon">
+                        <i class="bi bi-truck"></i>
+                    </div>
+
+                    <div>
+                        <h3>Suppliers</h3>
+                        <p>Manage your registered suppliers</p>
+                    </div>
+
+                </div>
+
+
+                <!-- SEARCH -->
+                <div class="supplier-search">
+
+                    <i class="bi bi-search"></i>
+
+                    <input
+                        type="text"
+                        id="searchSupplier"
+                        placeholder="Search suppliers..."
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="supplier-card-body">
+
+                <div class="supplier-table-wrapper">
+
+                    <table class="supplier-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Supplier</th>
+                                <th>Contact</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="supplier-body">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
 </div>
-</nav>
 
-<div class="container mt-4">
 
-<div class="card mb-4 shadow">
-
-<div class="card-body">
-
-<h4>Add Supplier</h4>
-
-<div class="mb-3">
-    <input
-        type="text"
-        id="searchSupplier"
-        class="form-control"
-        placeholder="🔍 Search supplier...">
-</div>
-
-<form id="supplierForm" class="row g-3">
-
-<div class="col-md-4">
-<input
-type="text"
-id="supplier_name"
-class="form-control"
-placeholder="Supplier Name"
-required>
-</div>
-
-<div class="col-md-4">
-<input
-type="text"
-id="contact_person"
-class="form-control"
-placeholder="Contact Person">
-</div>
-
-<div class="col-md-4">
-<input
-type="text"
-id="phone"
-class="form-control"
-placeholder="Phone">
-</div>
-
-<div class="col-md-4">
-<input
-type="email"
-id="email"
-class="form-control"
-placeholder="Email">
-</div>
-
-<div class="col-md-8">
-<input
-type="text"
-id="address"
-class="form-control"
-placeholder="Address">
-</div>
-
-<div class="col-md-12">
-<button class="btn btn-primary">
-Add Supplier
-</button>
-</div>
-
-</form>
-
-</div>
-
-</div>
-
-<div class="card shadow">
-
-<div class="card-body">
-
-<h4>Suppliers</h4>
-
-<table class="table table-bordered table-hover">
-
-<thead class="table-dark">
-
-<tr>
-
-<th>ID</th>
-<th>Supplier</th>
-<th>Contact</th>
-<th>Phone</th>
-<th>Email</th>
-<th>Address</th>
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-<tbody id="supplier-body">
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
+<!-- Supplier JavaScript -->
 <script src="/js/suppliers.js"></script>
 
 </body>

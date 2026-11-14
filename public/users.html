@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>ABC STORE - User Management</title>
+
+  <link rel="stylesheet"
+        href="css/style.css">
+
+  <style>
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    .users-page {
+      padding: 30px;
+    }
+
+    .users-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      gap: 20px;
+    }
+
+    .users-title h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .users-title p {
+      margin: 6px 0 0;
+      color: #6b7280;
+    }
+
+    .add-user-btn {
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .add-user-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .users-card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .users-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 15px;
+    }
+
+    .search-box {
+      width: 300px;
+      max-width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .search-box:focus {
+      border-color: #2563eb;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th {
+      text-align: left;
+      padding: 14px;
+      background: #f8fafc;
+      color: #6b7280;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 15px 14px;
+      border-top: 1px solid #eef2f7;
+      font-size: 14px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 6px 11px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .role-admin {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    .role-staff {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .action-btn {
+      border: none;
+      padding: 7px 11px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-right: 5px;
+    }
+
+    .edit-btn {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .delete-btn {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .action-btn:hover {
+      opacity: 0.8;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 35px;
+      color: #6b7280;
+    }
+
+
+    /* =========================
+       MODAL
+       ========================= */
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 450px;
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .close-btn {
+      border: none;
+      background: transparent;
+      font-size: 25px;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #2563eb;
+    }
+
+    .password-note {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 5px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .cancel-btn,
+    .save-btn {
+      border: none;
+      padding: 11px 18px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .cancel-btn {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .save-btn {
+      background: #2563eb;
+      color: white;
+    }
+
+    .save-btn:hover {
+      background: #1d4ed8;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+       ========================= */
+
+    @media (max-width: 700px) {
+
+      .users-page {
+        padding: 18px;
+      }
+
+      .users-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .users-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <div class="users-page">
+
+
+    <!-- =========================
+         HEADER
+         ========================= -->
+
+    <div class="users-header">
+
+      <div class="users-title">
+
+        <h1>User Management</h1>
+
+        <p>
+          Manage administrators and staff accounts
+        </p>
+
+      </div>
+
+
+      <button
+        class="add-user-btn"
+        onclick="openAddUserModal()">
+
+        + Add User
+
+      </button>
+
+    </div>
+
+
+    <!-- =========================
+         USERS CARD
+         ========================= -->
+
+    <div class="users-card">
+
+
+      <div class="users-toolbar">
+
+        <input
+          type="text"
+          id="searchInput"
+          class="search-box"
+          placeholder="Search users..."
+          oninput="filterUsers()">
+
+      </div>
+
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>ID</th>
+
+              <th>Username</th>
+
+              <th>Role</th>
+
+              <th>Created</th>
+
+              <th>Actions</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="usersTableBody">
+
+            <tr>
+
+              <td
+                colspan="5"
+                class="empty-message">
+
+                Loading users...
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       USER MODAL
+       ========================= -->
+
+  <div
+    id="userModal"
+    class="modal">
+
+
+    <div class="modal-box">
+
+
+      <div class="modal-header">
+
+        <h2 id="modalTitle">
+          Add User
+        </h2>
+
+        <button
+          class="close-btn"
+          onclick="closeUserModal()">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <form id="userForm">
+
+
+        <input
+          type="hidden"
+          id="userId">
+
+
+        <!-- Username -->
+
+        <div class="form-group">
+
+          <label>
+            Username
+          </label>
+
+          <input
+            type="text"
+            id="username"
+            placeholder="Enter username"
+            required>
+
+        </div>
+
+
+        <!-- Password -->
+
+        <div class="form-group">
+
+          <label>
+            Password
+          </label>
+
+          <input
+            type="password"
+            id="password"
+            placeholder="Enter password">
+
+          <div class="password-note">
+            Minimum 6 characters.
+            Leave empty while editing to keep the current password.
+          </div>
+
+        </div>
+
+
+        <!-- Role -->
+
+        <div class="form-group">
+
+          <label>
+            Role
+          </label>
+
+          <select id="role" required>
+
+            <option value="staff">
+              Staff
+            </option>
+
+            <option value="admin">
+              Admin
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Buttons -->
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="cancel-btn"
+            onclick="closeUserModal()">
+
+            Cancel
+
+          </button>
+
+
+          <button
+            type="submit"
+            class="save-btn">
+
+            Save User
+
+          </button>
+
+        </div>
+
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       JAVASCRIPT
+       ========================= -->
+
+  <script>
+
+    let users = [];
+
+    let editingUserId = null;
+
+
+    // =========================================
+    // LOAD USERS
+    // =========================================
+
+    async function loadUsers() {
+
+      try {
+
+        const response = await fetch('/api/users');
+
+        if (!response.ok) {
+
+          const error = await response.json();
+
+          throw new Error(
+            error.message || 'Failed to load users'
+          );
+
+        }
+
+        users = await response.json();
+
+        renderUsers(users);
+
+      } catch (error) {
+
+        console.error(error);
+
+        document.getElementById(
+          'usersTableBody'
+        ).innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-message">
+              ${error.message}
+            </td>
+          </tr>
+        `;
+
+      }
+
+    }
+
+
+    // =========================================
+    // RENDER USERS
+    // =========================================
+
+    function renderUsers(list) {
+
+      const tbody =
+        document.getElementById(
+          'usersTableBody'
+        );
+
+
+      if (!list.length) {
+
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-message">
+              No users found
+            </td>
+          </tr>
+        `;
+
+        return;
+
+      }
+
+
+      tbody.innerHTML = list.map(user => {
+
+        const roleClass =
+          user.role === 'admin'
+            ? 'role-admin'
+            : 'role-staff';
+
+
+        const createdDate =
+          user.created_at
+            ? new Date(
+                user.created_at
+              ).toLocaleDateString()
+            : '-';
+
+
+        return `
+
+          <tr>
+
+            <td>
+              ${user.id}
+            </td>
+
+            <td>
+              <strong>
+                ${escapeHtml(user.username)}
+              </strong>
+            </td>
+
+            <td>
+
+              <span
+                class="role-badge ${roleClass}">
+
+                ${user.role.toUpperCase()}
+
+              </span>
+
+            </td>
+
+            <td>
+              ${createdDate}
+            </td>
+
+            <td>
+
+              <button
+                class="action-btn edit-btn"
+                onclick="editUser(${user.id})">
+
+                Edit
+
+              </button>
+
+
+              <button
+                class="action-btn delete-btn"
+                onclick="deleteUser(${user.id})">
+
+                Delete
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        `;
+
+      }).join('');
+
+    }
+
+
+    // =========================================
+    // ESCAPE HTML
+    // =========================================
+
+    function escapeHtml(value) {
+
+      return String(value)
+
+        .replace(/&/g, '&amp;')
+
+        .replace(/</g, '&lt;')
+
+        .replace(/>/g, '&gt;')
+
+        .replace(/"/g, '&quot;')
+
+        .replace(/'/g, '&#039;');
+
+    }
+
+
+    // =========================================
+    // SEARCH
+    // =========================================
+
+    function filterUsers() {
+
+      const search =
+        document.getElementById(
+          'searchInput'
+        ).value
+        .toLowerCase()
+        .trim();
+
+
+      const filtered =
+        users.filter(user =>
+          user.username
+            .toLowerCase()
+            .includes(search)
+          ||
+          user.role
+            .toLowerCase()
+            .includes(search)
+        );
+
+
+      renderUsers(filtered);
+
+    }
+
+
+    // =========================================
+    // OPEN ADD USER MODAL
+    // =========================================
+
+    function openAddUserModal() {
+
+      editingUserId = null;
+
+      document.getElementById(
+        'modalTitle'
+      ).textContent = 'Add User';
+
+
+      document.getElementById(
+        'userForm'
+      ).reset();
+
+
+      document.getElementById(
+        'userId'
+      ).value = '';
+
+
+      document.getElementById(
+        'password'
+      ).required = true;
+
+
+      document.getElementById(
+        'userModal'
+      ).style.display = 'flex';
+
+    }
+
+
+    // =========================================
+    // EDIT USER
+    // =========================================
+
+    function editUser(id) {
+
+      const user =
+        users.find(
+          item => Number(item.id) === Number(id)
+        );
+
+
+      if (!user) {
+
+        alert('User not found');
+
+        return;
+
+      }
+
+
+      editingUserId = id;
+
+
+      document.getElementById(
+        'modalTitle'
+      ).textContent = 'Edit User';
+
+
+      document.getElementById(
+        'userId'
+      ).value = user.id;
+
+
+      document.getElementById(
+        'username'
+      ).value = user.username;
+
+
+      document.getElementById(
+        'role'
+      ).value = user.role;
+
+
+      document.getElementById(
+        'password'
+      ).value = '';
+
+
+      document.getElementById(
+        'password'
+      ).required = false;
+
+
+      document.getElementById(
+        'userModal'
+      ).style.display = 'flex';
+
+    }
+
+
+    // =========================================
+    // CLOSE MODAL
+    // =========================================
+
+    function closeUserModal() {
+
+      document.getElementById(
+        'userModal'
+      ).style.display = 'none';
+
+    }
+
+
+    // =========================================
+    // SAVE USER
+    // =========================================
+
+    document.getElementById(
+      'userForm'
+    ).addEventListener(
+      'submit',
+      async function(event) {
+
+        event.preventDefault();
+
+
+        const username =
+          document.getElementById(
+            'username'
+          ).value.trim();
+
+
+        const password =
+          document.getElementById(
+            'password'
+          ).value;
+
+
+        const role =
+          document.getElementById(
+            'role'
+          ).value;
+
+
+        try {
+
+          let response;
+
+
+          if (editingUserId) {
+
+            response = await fetch(
+              `/api/users/${editingUserId}`,
+              {
+                method: 'PUT',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body: JSON.stringify({
+                  username,
+                  password,
+                  role
+                })
+
+              }
+            );
+
+          } else {
+
+            response = await fetch(
+              '/api/users',
+              {
+                method: 'POST',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body: JSON.stringify({
+                  username,
+                  password,
+                  role
+                })
+
+              }
+            );
+
+          }
+
+
+          const result =
+            await response.json();
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              result.message ||
+              'Operation failed'
+            );
+
+          }
+
+
+          alert(result.message);
+
+
+          closeUserModal();
+
+          await loadUsers();
+
+        } catch (error) {
+
+          console.error(error);
+
+          alert(error.message);
+
+        }
+
+      }
+    );
+
+
+    // =========================================
+    // DELETE USER
+    // =========================================
+
+    async function deleteUser(id) {
+
+      const user =
+        users.find(
+          item => Number(item.id) === Number(id)
+        );
+
+
+      if (!user) {
+
+        return;
+
+      }
+
+
+      const confirmed =
+        confirm(
+          `Are you sure you want to delete user "${user.username}"?`
+        );
+
+
+      if (!confirmed) {
+
+        return;
+
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            `/api/users/${id}`,
+            {
+              method: 'DELETE'
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            result.message ||
+            'Failed to delete user'
+          );
+
+        }
+
+
+        alert(result.message);
+
+
+        await loadUsers();
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(error.message);
+
+      }
+
+    }
+
+
+    // =========================================
+    // CLOSE MODAL WHEN CLICKING OUTSIDE
+    // =========================================
+
+    document
+      .getElementById('userModal')
+      .addEventListener(
+        'click',
+        function(event) {
+
+          if (
+            event.target === this
+          ) {
+
+            closeUserModal();
+
+          }
+
+        }
+      );
+
+
+    // =========================================
+    // INITIAL LOAD
+    // =========================================
+
+    loadUsers();
+
+  </script>
+
+</body>
+
+</html>
